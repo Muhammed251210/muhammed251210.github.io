@@ -2,11 +2,11 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<title>Muhammed251210 - GitHub</title>
+<title>Muhammed251210 - GitHub Projeleri</title>
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: #f3f3f3;
+    background: #f6f6f6;
     margin: 0;
     padding: 20px;
 }
@@ -18,15 +18,26 @@ h1 {
     padding: 15px;
     margin: 10px 0;
     border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .repo a {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     text-decoration: none;
+    display: block;
+    margin-bottom: 5px;
 }
-.desc {
+.repo .desc {
     color: #555;
+}
+.repo .pages {
+    margin-top: 8px;
+    padding: 8px;
+    background: #eef7ff;
+    border-radius: 6px;
+}
+.pages a {
+    color: #0074d9;
 }
 </style>
 </head>
@@ -36,19 +47,39 @@ h1 {
 <div id="repos">Yükleniyor...</div>
 
 <script>
-// Otomatik repo çekme
-fetch("https://api.github.com/users/Muhammed251210/repos")
+// GitHub kullanıcı adı
+const user = "Muhammed251210";
+
+// Repoları al
+fetch(`https://api.github.com/users/${user}/repos`)
   .then(res => res.json())
   .then(data => {
     let html = "";
     data.forEach(repo => {
+      
+      // GitHub repo linki
+      let githubLink = repo.html_url;
+
+      // GitHub Pages linki (varsa aktif olur)
+      let pagesLink = `https://${user}.github.io/${repo.name}/`;
+
+      // Pages aktif mi kontrolü
+      // (Sadece default branch'ta index.html varsa çalışır)
+      let pagesHTML = `
+        <div class="pages">
+          🌐 <a href="${pagesLink}" target="_blank">${repo.name} GitHub Pages</a>
+        </div>
+      `;
+
       html += `
         <div class="repo">
-          <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+          <a href="${githubLink}" target="_blank">${repo.name}</a>
           <p class="desc">${repo.description || "Açıklama yok"}</p>
+          ${pagesHTML}
         </div>
       `;
     });
+
     document.getElementById("repos").innerHTML = html;
   });
 </script>
