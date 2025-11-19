@@ -1,87 +1,214 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<title>Muhammed251210 - GitHub Projeleri</title>
+<meta charset="UTF-8">
+<title>Muhammed251210 - Minecraft GitHub Hub</title>
+
+<!-- Google pixel font -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f6f6f6;
-    margin: 0;
-    padding: 20px;
-}
-h1 {
-    text-align: center;
-}
-.repo {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.repo a {
-    font-size: 18px;
-    font-weight: bold;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 5px;
-}
-.repo .desc {
-    color: #555;
-}
-.repo .pages {
-    margin-top: 8px;
-    padding: 8px;
-    background: #eef7ff;
-    border-radius: 6px;
-}
-.pages a {
-    color: #0074d9;
-}
+    body {
+        font-family: 'Press Start 2P', cursive;
+        background: url("https://i.imgur.com/dZl7Z8p.png");
+        background-size: 128px;
+        margin: 0;
+        padding: 20px;
+        color: white;
+        text-shadow: 2px 2px 0px #000;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        margin: 20px auto;
+        max-width: 500px;
+        display: flex;
+        gap: 10px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 3px solid #2d7d2b;
+        border-radius: 6px;
+        background: #c7f9c4;
+        font-family: 'Press Start 2P';
+    }
+
+    .repo {
+        background: rgba(0,0,0,0.65);
+        border: 3px solid #3fa33f;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 12px;
+        box-shadow: 0 5px 0 #1a481a;
+    }
+
+    .repo a {
+        color: #97ff97;
+        font-size: 18px;
+        text-decoration: none;
+    }
+
+    .desc {
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    .pages, .releases, .prereleases {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.1);
+    }
+
+    .release-item, .pre-item {
+        margin-top: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(0,0,0,0.4);
+    }
+
+    .release-item {
+        border-left: 6px solid #4caf50;
+    }
+
+    .pre-item {
+        border-left: 6px solid #ff9800;
+    }
+
+    .hidden {
+        display: none;
+    }
 </style>
 </head>
 <body>
 
-<h1>📦 Muhammed’in GitHub Projeleri</h1>
+<h1>⛏ Muhammed'in Minecraft Temalı GitHub Hub'ı</h1>
+
+<!-- Arama ve filtre bölümü -->
+<div class="search-box">
+    <input type="text" id="search" placeholder="🔍 Repo Ara">
+</div>
+
+<div class="search-box">
+    <select id="filter">
+        <option value="all">Tüm Repolar</option>
+        <option value="pages">Pages Olanlar</option>
+        <option value="releases">Releases Olanlar</option>
+        <option value="prereleases">Pre-Releases Olanlar</option>
+    </select>
+</div>
+
 <div id="repos">Yükleniyor...</div>
 
 <script>
-// GitHub kullanıcı adı
 const user = "Muhammed251210";
+const repoContainer = document.getElementById("repos");
 
-// Repoları al
-fetch(`https://api.github.com/users/${user}/repos`)
-  .then(res => res.json())
-  .then(data => {
-    let html = "";
-    data.forEach(repo => {
-      
-      // GitHub repo linki
-      let githubLink = repo.html_url;
+// REPO YÜKLEME
+async function loadRepos() {
+    const repos = await fetch(`https://api.github.com/users/${user}/repos`)
+        .then(res => res.json());
 
-      // GitHub Pages linki (varsa aktif olur)
-      let pagesLink = `https://${user}.github.io/${repo.name}/`;
+    for (const repo of repos) {
+        const repoCard = document.createElement("div");
+        repoCard.className = "repo";
+        repoCard.dataset.name = repo.name.toLowerCase();
 
-      // Pages aktif mi kontrolü
-      // (Sadece default branch'ta index.html varsa çalışır)
-      let pagesHTML = `
-        <div class="pages">
-          🌐 <a href="${pagesLink}" target="_blank">${repo.name} GitHub Pages</a>
-        </div>
-      `;
+        const pagesLink = `https://${user}.github.io/${repo.name}/`;
 
-      html += `
-        <div class="repo">
-          <a href="${githubLink}" target="_blank">${repo.name}</a>
-          <p class="desc">${repo.description || "Açıklama yok"}</p>
-          ${pagesHTML}
-        </div>
-      `;
+        repoCard.innerHTML = `
+            <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+            <p class="desc">${repo.description || "Açıklama yok"}</p>
+
+            <div class="pages">
+                🌍 <a href="${pagesLink}" target="_blank">GitHub Pages</a>
+            </div>
+
+            <div class="releases" id="rel-${repo.name}">
+                ⬇ Releases: Yükleniyor...
+            </div>
+
+            <div class="prereleases" id="pre-${repo.name}">
+                ⚠ Pre-Releases: Yükleniyor...
+            </div>
+        `;
+
+        repoContainer.appendChild(repoCard);
+
+        loadReleases(repo.name, repoCard);
+    }
+}
+
+// RELEASES YÜKLEME
+async function loadReleases(repo, repoCard) {
+    const releases = await fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
+        .then(r => r.json());
+
+    const relBlock = document.getElementById(`rel-${repo}`);
+    const preBlock = document.getElementById(`pre-${repo}`);
+
+    let stableHTML = "";
+    let preHTML = "";
+    let hasRelease = false;
+    let hasPre = false;
+
+    releases.forEach(release => {
+        const block = `
+            <div class="${release.prerelease ? "pre-item" : "release-item"}">
+                <div>${release.name || release.tag_name}</div>
+                <div>📅 ${new Date(release.published_at).toLocaleDateString()}</div>
+                <a href="${release.html_url}" target="_blank">🔗 GitHub Release</a>
+                <p>${release.body || ""}</p>
+            </div>
+        `;
+
+        if (release.prerelease) {
+            preHTML += block;
+            hasPre = true;
+        } else {
+            stableHTML += block;
+            hasRelease = true;
+        }
     });
 
-    document.getElementById("repos").innerHTML = html;
-  });
+    relBlock.innerHTML = "⬇ Releases:" + (stableHTML || "<p>Yok</p>");
+    preBlock.innerHTML = "⚠ Pre-Releases:" + (preHTML || "<p>Yok</p>");
+
+    // filtre için işaret koy
+    if (hasRelease) repoCard.dataset.releases = "1";
+    if (hasPre) repoCard.dataset.prereleases = "1";
+    repoCard.dataset.pages = "1"; // hepsi pages linkli
+}
+
+// ARAMA
+document.getElementById("search").addEventListener("input", function () {
+    const value = this.value.toLowerCase();
+    document.querySelectorAll(".repo").forEach(repo => {
+        repo.style.display = repo.dataset.name.includes(value) ? "" : "none";
+    });
+});
+
+// FİLTRE
+document.getElementById("filter").addEventListener("change", function () {
+    const type = this.value;
+
+    document.querySelectorAll(".repo").forEach(repo => {
+        repo.style.display = "block";
+
+        if (type === "pages" && !repo.dataset.pages) repo.style.display = "none";
+        if (type === "releases" && !repo.dataset.releases) repo.style.display = "none";
+        if (type === "prereleases" && !repo.dataset.prereleases) repo.style.display = "none";
+    });
+});
+
+// BAŞLAT
+loadRepos();
 </script>
 
 </body>
