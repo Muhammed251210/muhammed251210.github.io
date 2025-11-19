@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<title>Muhammed251210 - GitHub</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f3f3;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    text-align: center;
+}
+.repo {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+.repo a {
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+.desc {
+    color: #555;
+}
+</style>
+</head>
+<body>
+
+<h1>📦 Muhammed’in GitHub Projeleri</h1>
+<div id="repos">Yükleniyor...</div>
+
+<script>
+// Otomatik repo çekme
+fetch("https://api.github.com/users/Muhammed251210/repos")
+  .then(res => res.json())
+  .then(data => {
+    let html = "";
+    data.forEach(repo => {
+      html += `
+        <div class="repo">
+          <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+          <p class="desc">${repo.description || "Açıklama yok"}</p>
+        </div>
+      `;
+    });
+    document.getElementById("repos").innerHTML = html;
+  });
+</script>
+
+</body>
+</html>
